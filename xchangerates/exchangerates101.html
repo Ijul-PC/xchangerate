@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+<title>
+    exchange rate
+</title>
+
+<body>
+    <div id="exchange" />
+    <script type="text/babel">
+
+        class Duit extends React.Component {
+
+            constructor(props){
+                super(props)
+                this.currencies = ["IDR", "USD", "JPY", "CZK"]
+                this.state = {
+                    base: "IDR",
+                    target:"USD",
+                    value: 0,
+                    converted: 0
+                }
+            }
+
+            render(){
+                return (
+                    <div>
+                        <div>
+                            <select onChange={this.makeSelection} name="base" value={this.state.base}>
+                                 {this.currencies.map(currency => <option key={currency} value={currency}>
+                                     {currency} </option>)} </select>
+                            <input onChange={this.changeValue} value={this.state.value}/>
+                        </div>
+                        <div>
+                            <select onChange={this.makeSelection} name="target" value={this.state.target}>
+                                {this.currencies.map(currency => <option key={currency} value={currency}>
+                                    {currency} </option>)} </select>
+                            <input disabled={true} value={this.state.converted}/>
+                        </div>
+                    </div>
+                )
+            }
+
+            changeValue = (event) => {
+                this.setState({
+                    value: event.target.value
+                }, this.recalculate)
+            }
+
+            makeSelection = (event) => {
+                this.setState({
+                    [event.target.name]: event.target.value
+                }, this.recalculate)
+            }
+
+            recalculate = () => {
+                const value = parseFloat(this.state.value);
+                
+                if (isNaN(value)) {
+                    return;
+                }
+
+                fetch(`https://api.exchangeratesapi.io/latest?base=${this.state.base}`)
+                .then(res => res.json())
+                .then(data => {
+                    this.setState({
+                        converted: data.rates[this.state.target] * value
+                    })
+                })
+            }
+
+        //     class App extends React.Component {
+
+        //         render() {
+        //         return (
+        //             <div>
+        //          <Duit />    
+
+        //         </div>
+        //          );
+        //     }
+        // }
+    }
+        
+        
+       ReactDOM.render(<Duit />, document.querySelector('#exchange')) 
+        
+        
+        </script>
+</body>
+
+</html>
